@@ -1,6 +1,7 @@
 import java.io.File
 import java.nio.file.{Files, Paths}
 
+
 object App {
 
 
@@ -20,8 +21,30 @@ object App {
     val Unknown, SystemV, HP_UX, NetBSD, Linux = Value
   }
 
+  object ObjectFileTypeEnum extends Enumeration {
+    type ObjecFileTypeEnum = Value
+    //TODO: There are other values.
+    val ET_NONE, ET_REL, ET_EXEC, ET_DYN, ET_CORE = Value
+  }
+
+
+
+  def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
+            endian: App.EndianessEnum.EndianessENum): Int = {
+    assert(byteCnt <= 4)
+    val sum = 0
+    var idxs = (idx until (idx + byteCnt)).toList
+    if (endian == App.EndianessEnum.BIG) {
+      idxs = idxs.reverse
+    }
+
+    idxs.zipWithIndex.map(e => bytetArray(e._1.toInt).toInt<<(8*e._2)).sum
+  }
+
 
   def main(args: Array[String]): Unit = {
+
+
     println("Hello")
     var pwd = new File(".").getAbsolutePath
     println(pwd)
@@ -34,8 +57,12 @@ object App {
     println(byteArray(3) == 'F'.toInt)
     val wordLen = byteArray(0x04)
     println(WordSizeEnum.apply(wordLen))
-    println(EndianessEnum.apply(byteArray(0x5)))
+    val endian = EndianessEnum.apply(byteArray(0x5))
+    println(endian)
     println(OsEnum.apply(byteArray(0x7)))
+    val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, 0x10, 2, endian))
+    println(elfType)
+    assert(elfType == ObjectFileTypeEnum.ET_DYN)
   }
 
 }
