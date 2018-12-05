@@ -27,6 +27,12 @@ object App {
     val ET_NONE, ET_REL, ET_EXEC, ET_DYN, ET_CORE = Value
   }
 
+  object ProgHeaderTypeEnum extends Enumeration {
+    type ProgHeaderTypeEnum = Value
+    val PT_NULL, PT_LOAD, PT_DYNAMIC, PT_INTERP, PT_NOTE, PT_SHLIB, PT_PHDR = Value
+    val PT_LOOS = Value(0x60000000)
+  }
+
 
 
   def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
@@ -63,6 +69,17 @@ object App {
     val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, 0x10, 2, endian))
     println(elfType)
     assert(elfType == ObjectFileTypeEnum.ET_DYN)
+
+    if (WordSizeEnum.BIT32 == WordSizeEnum.apply(wordLen)) {
+      val progHdrOff = asInt(byteArray, 0x1C, 4, endian)
+      println(progHdrOff)
+      val phEntSize = asInt(byteArray, 0x2A, 2, endian)
+      println(s"A Program Entry Size: $phEntSize")
+      val phEntNum = asInt(byteArray, 0x2C, 2, endian)
+      println(s"Program entry count: $phEntNum")
+      val phType = asInt(byteArray, progHdrOff + 0x00, 4, endian)
+      println(ProgHeaderTypeEnum.apply(phType))
+    }
   }
 
 }
