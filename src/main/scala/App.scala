@@ -33,6 +33,13 @@ object App {
     val PT_LOOS = Value(0x60000000)
   }
 
+  object ShTypeEnum extends Enumeration {
+    type ShTypeEnum = Value
+    val SHT_NULL, SHT_PROGBITS, SHT_SYMTAB, SHT_STRTAB, SHT_RELA, SHT_HASH, SHT_DYNAMIC, SHT_NOTE = Value
+    val SHT_NOBITS, SHT_REL, SHT_SHLIB, SHT_DYNSYM, SHT_INIT_ARRAY, SHT_FINI_ARRAY = Value
+    val SHT_PREINIT_ARRAY, SHT_GROUP, SHT_NUM = Value
+    val SHT_LOOS = Value(0x60000000)
+  }
 
 
   def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
@@ -91,11 +98,25 @@ object App {
       // Find the section .shstrtab
       val strTabSectHeaderIdx = sectHdrOff + (shEntNum-1) * shEntSize
 
-      val shType = asInt(byteArray, strTabSectHeaderIdx + 0x4, 4, endian)
+      val shType = ShTypeEnum.apply(asInt(byteArray, strTabSectHeaderIdx + 0x4, 4, endian))
       println(shType)
 
-      val temp = asInt(byteArray, sectHdrOff + 0x4, 4, endian)
-      println(temp)
+      val sectionOffSet = asInt(byteArray, strTabSectHeaderIdx + 0x10, 4, endian)
+      println(sectionOffSet)
+      val sectionSize = asInt(byteArray, strTabSectHeaderIdx + 0x14, 4, endian)
+      println(sectionSize)
+      (sectionOffSet until (sectionOffSet + sectionSize)).foreach(
+        i => {
+          val c = byteArray(i)
+          if (c == 0) {
+            println()
+          } else {
+            print(byteArray(i).toChar)
+          }
+        }
+      )
+      println()
+      byteArray.toList
     }
   }
 
