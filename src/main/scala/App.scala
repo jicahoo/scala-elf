@@ -18,7 +18,7 @@ object App {
   object OsEnum extends Enumeration {
     type OsEnum = Value
     //TODO: There are many other platforms
-    val Unknown, SystemV, HP_UX, NetBSD, Linux = Value
+    val SystemV, HP_UX, NetBSD, Linux = Value
   }
 
   object ObjectFileTypeEnum extends Enumeration {
@@ -44,7 +44,7 @@ object App {
       idxs = idxs.reverse
     }
 
-    idxs.zipWithIndex.map(e => bytetArray(e._1.toInt).toInt<<(8*e._2)).sum
+    idxs.zipWithIndex.map(e => (bytetArray(e._1.toInt) & 0xff) <<(8*e._2)).sum
   }
 
 
@@ -79,6 +79,23 @@ object App {
       println(s"Program entry count: $phEntNum")
       val phType = asInt(byteArray, progHdrOff + 0x00, 4, endian)
       println(ProgHeaderTypeEnum.apply(phType))
+
+      val sectHdrOff = asInt(byteArray, 0x20, 4, endian)
+
+      println(s"Section Header Offset: ${sectHdrOff.toHexString}")
+      val shEntSize = asInt(byteArray, 0x2E, 2, endian)
+      val shEntNum = asInt(byteArray, 0x30, 2, endian)
+      println(s"Section header size: $shEntSize, Section header number: $shEntNum ")
+
+
+      // Find the section .shstrtab
+      val strTabSectHeaderIdx = sectHdrOff + (shEntNum-1) * shEntSize
+
+      val shType = asInt(byteArray, strTabSectHeaderIdx + 0x4, 4, endian)
+      println(shType)
+
+      val temp = asInt(byteArray, sectHdrOff + 0x4, 4, endian)
+      println(temp)
     }
   }
 
