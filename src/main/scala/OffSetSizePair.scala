@@ -1,0 +1,1 @@
+case class OffSetSizePair(offSet: Int, size: Int)

@@ -24,7 +24,7 @@ class ElfFile(val filePath: String) {
     println(byteArray(1) == 'E'.toInt) //E
     println(byteArray(2) == 'L'.toInt) //L
     println(byteArray(3) == 'F'.toInt)
-    val wordLen = byteArray(0x04)
+    val wordLen = byteArray(IdentMetaData.ET_CLASS.offSet) & 0xff
     println(WordSizeEnum.apply(wordLen))
     val endian = EndianessEnum.apply(byteArray(0x5))
     println(endian)
