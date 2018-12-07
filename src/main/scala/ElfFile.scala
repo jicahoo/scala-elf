@@ -46,9 +46,13 @@ class ElfFile(val filePath: String) {
     val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, FileHeader.elfType))
     println(elfType)
     assert(elfType == ObjectFileTypeEnum.ET_DYN)
-
+    var metaData: MetaData = null;
+     WordSizeEnum.apply(wordLenTag) match {
+      case WordSizeEnum.BIT32 => metaData = new MetaData32
+      case WordSizeEnum.BIT64 => metaData = new MetaData64
+    }
     if (WordSizeEnum.BIT32 == WordSizeEnum.apply(wordLenTag)) {
-      val progHdrOff = asInt(byteArray, 0x1C, 4, endian)
+      val progHdrOff = asInt(byteArray, metaData.phOff)
       println(progHdrOff)
       val phEntSize = asInt(byteArray, 0x2A, 2, endian)
       println(s"A Program Entry Size: $phEntSize")
