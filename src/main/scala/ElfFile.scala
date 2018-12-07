@@ -5,7 +5,8 @@ import ProgramHeader._
 import SectionHeader._
 
 class ElfFile(val filePath: String) {
-  def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
+  private var _endian = EndianessEnum.LITTLE
+  private def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
             endian: EndianessEnum.EndianessENum): Int = {
     assert(byteCnt <= 4)
     val sum = 0
@@ -17,6 +18,18 @@ class ElfFile(val filePath: String) {
     idxs.zipWithIndex.map(e => (bytetArray(e._1.toInt) & 0xff) <<(8*e._2)).sum
   }
 
+  def asInt(byteArray: Array[Byte], offSetSizePair: OffSetSizePair): Int = {
+     if (offSetSizePair.size == 1) {
+       byteArray(offSetSizePair.offSet) & 0xff
+     } else {
+       asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, _endian)
+     }
+  }
+
+  def asInt(byteArray: Array[Byte], offSetSizePair: OffSetSizePair, endian: EndianessEnum.EndianessENum): Int = {
+    asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, endian)
+  }
+
   def printSummary(): Unit = {
     val byteArray = Files.readAllBytes(Paths.get(filePath))
     println(s"Byte size: ${byteArray.length}")
@@ -24,16 +37,17 @@ class ElfFile(val filePath: String) {
     println(byteArray(1) == 'E'.toInt) //E
     println(byteArray(2) == 'L'.toInt) //L
     println(byteArray(3) == 'F'.toInt)
-    val wordLen = byteArray(IdentMetaData.ET_CLASS.offSet) & 0xff
-    println(WordSizeEnum.apply(wordLen))
-    val endian = EndianessEnum.apply(byteArray(0x5))
+    val wordLenTag = asInt(byteArray, IdentMetaData.ET_CLASS)
+    println(WordSizeEnum.apply(wordLenTag))
+    val endian = EndianessEnum.apply(asInt(byteArray, IdentMetaData.ET_DATA))
+    _endian  = endian
     println(endian)
-    println(OsEnum.apply(byteArray(0x7)))
-    val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, 0x10, 2, endian))
+    println(OsEnum.apply(asInt(byteArray, IdentMetaData.ET_OSABI)))
+    val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, FileHeader.elfType))
     println(elfType)
     assert(elfType == ObjectFileTypeEnum.ET_DYN)
 
-    if (WordSizeEnum.BIT32 == WordSizeEnum.apply(wordLen)) {
+    if (WordSizeEnum.BIT32 == WordSizeEnum.apply(wordLenTag)) {
       val progHdrOff = asInt(byteArray, 0x1C, 4, endian)
       println(progHdrOff)
       val phEntSize = asInt(byteArray, 0x2A, 2, endian)

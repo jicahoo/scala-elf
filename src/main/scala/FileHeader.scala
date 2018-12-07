@@ -24,4 +24,6 @@ object FileHeader {
     //TODO: There are other values.
     val ET_NONE, ET_REL, ET_EXEC, ET_DYN, ET_CORE = Value
   }
+
+  val elfType = OffSetSizePair(0x10, 2)
 }
