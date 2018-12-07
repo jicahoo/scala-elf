@@ -1,6 +1,15 @@
-class FileHeader {
+import FileHeader.EndianessEnum.EndianessENum
+import FileHeader.OsEnum.OsEnum
+import FileHeader.WordSizeEnum.WordSizeEnum
+import FileHeader.ObjectFileTypeEnum.ObjecFileTypeEnum
 
-}
+
+case class FileHeader (
+                 var wordLen: WordSizeEnum,
+                 var endian: EndianessENum,
+                 var osType: OsEnum,
+                 var objFileType: ObjecFileTypeEnum
+                 )
 
 object FileHeader {
   object WordSizeEnum extends Enumeration {

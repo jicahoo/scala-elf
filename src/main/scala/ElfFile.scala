@@ -32,26 +32,30 @@ class ElfFile(val filePath: String) {
 
   def printSummary(): Unit = {
     val byteArray = Files.readAllBytes(Paths.get(filePath))
+
+
     println(s"Byte size: ${byteArray.length}")
     println(byteArray(0) == 0x7f)
     println(byteArray(1) == 'E'.toInt) //E
     println(byteArray(2) == 'L'.toInt) //L
     println(byteArray(3) == 'F'.toInt)
     val wordLenTag = asInt(byteArray, IdentMetaData.ET_CLASS)
-    println(WordSizeEnum.apply(wordLenTag))
+    val wordLen = WordSizeEnum.apply(wordLenTag)
+    println(wordLen)
     val endian = EndianessEnum.apply(asInt(byteArray, IdentMetaData.ET_DATA))
     _endian  = endian
     println(endian)
-    println(OsEnum.apply(asInt(byteArray, IdentMetaData.ET_OSABI)))
+    val osType = OsEnum.apply(asInt(byteArray, IdentMetaData.ET_OSABI))
+    println(osType)
     val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, FileHeader.elfType))
     println(elfType)
     assert(elfType == ObjectFileTypeEnum.ET_DYN)
     var metaData: MetaData = null;
-     WordSizeEnum.apply(wordLenTag) match {
+     wordLen match {
       case WordSizeEnum.BIT32 => metaData = new MetaData32
       case WordSizeEnum.BIT64 => metaData = new MetaData64
     }
-    if (WordSizeEnum.BIT32 == WordSizeEnum.apply(wordLenTag)) {
+    if (WordSizeEnum.BIT32 == wordLen) {
       val progHdrOff = asInt(byteArray, metaData.phOff)
       println(progHdrOff)
       val phEntSize = asInt(byteArray, metaData.phEntSize)
@@ -70,6 +74,9 @@ class ElfFile(val filePath: String) {
       val shEntNum = asInt(byteArray, metaData.shNum)
       println(s"Section header size: $shEntSize, Section header number: $shEntNum ")
 
+      //TODO: Builder pattern? better?
+      val fileHeader = FileHeader(wordLen, endian, osType, elfType)
+      println(fileHeader)
 
       // Find the section .shstrtab
       val strTabSectHeaderIdx = sectHdrOff + (shEntNum - 1) * shEntSize
