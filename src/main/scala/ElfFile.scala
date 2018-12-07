@@ -54,18 +54,20 @@ class ElfFile(val filePath: String) {
     if (WordSizeEnum.BIT32 == WordSizeEnum.apply(wordLenTag)) {
       val progHdrOff = asInt(byteArray, metaData.phOff)
       println(progHdrOff)
-      val phEntSize = asInt(byteArray, 0x2A, 2, endian)
+      val phEntSize = asInt(byteArray, metaData.phEntSize)
       println(s"A Program Entry Size: $phEntSize")
-      val phEntNum = asInt(byteArray, 0x2C, 2, endian)
+      val phEntNum = asInt(byteArray, metaData.phNum)
       println(s"Program entry count: $phEntNum")
+
+
       val phType = asInt(byteArray, progHdrOff + 0x00, 4, endian)
       println(ProgHeaderTypeEnum.apply(phType))
 
-      val sectHdrOff = asInt(byteArray, 0x20, 4, endian)
+      val sectHdrOff = asInt(byteArray, metaData.shOff)
 
       println(s"Section Header Offset: ${sectHdrOff.toHexString}")
-      val shEntSize = asInt(byteArray, 0x2E, 2, endian)
-      val shEntNum = asInt(byteArray, 0x30, 2, endian)
+      val shEntSize = asInt(byteArray, metaData.shEntSize)
+      val shEntNum = asInt(byteArray, metaData.shNum)
       println(s"Section header size: $shEntSize, Section header number: $shEntNum ")
 
 
