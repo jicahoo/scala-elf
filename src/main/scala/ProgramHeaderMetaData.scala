@@ -2,14 +2,16 @@ import java.time.OffsetDateTime
 
 abstract class ProgramHeaderMetaData {
   def pType: OffSetSizePair
+  //TODO: no need these methods: ProgramHeader.member.getType.
+  def pTypeTargetType: Class[_]
   def pFlags: OffSetSizePair
+  def pFlagsTargetType: Class[_]
   def pOffset: OffSetSizePair
   def pVirtualAddr: OffSetSizePair
   def pPhysicalAddr: OffSetSizePair
   def pFileSize: OffSetSizePair
   def pMemSize: OffSetSizePair
-  def pALgin: OffSetSizePair
-
+  def pAlgin: OffSetSizePair
 }
 
 class ProgramHeaderMetaData32 extends ProgramHeaderMetaData {
@@ -27,6 +29,9 @@ class ProgramHeaderMetaData32 extends ProgramHeaderMetaData {
 
   override def pFlags: OffSetSizePair = OffSetSizePair(0x18, 4)
 
-  override def pALgin: OffSetSizePair = OffSetSizePair(0x1C, 4)
+  override def pAlgin: OffSetSizePair = OffSetSizePair(0x1C, 4)
 
+  override def pTypeTargetType: Class[_] = Int.getClass
+
+  override def pFlagsTargetType: Class[_] = ProgramHeader.ProgHeaderTypeEnum.getClass
 }
