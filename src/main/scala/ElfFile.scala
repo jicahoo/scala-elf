@@ -40,10 +40,10 @@ class ElfFile(val filePath: String) {
 
 
     println(s"Byte size: ${_byteArray.length}")
-    println(_byteArray(0) == 0x7f)
-    println(_byteArray(1) == 'E'.toInt) //E
-    println(_byteArray(2) == 'L'.toInt) //L
-    println(_byteArray(3) == 'F'.toInt)
+    val magicNum = Array[Byte](0x7f.toByte, 'E'.toByte, 'L'.toByte, 'F'.toByte)
+    if (!_byteArray.slice(0,4).sameElements(magicNum)) {
+      throw new IllegalArgumentException("Magic number is not '.ELF'.Maybe not a ELF file.")
+    }
 
     val wordLenTag = asInt(IdentMetaData.ET_CLASS)
     val wordLen = WordSizeEnum.apply(wordLenTag)
@@ -68,7 +68,6 @@ class ElfFile(val filePath: String) {
       val shEntSize = asInt(metaData.shEntSize)
       val shEntNum = asInt(metaData.shNum)
 
-      //TODO: Builder pattern? better?
       val fileHeader = FileHeader(
         wordLen = wordLen,
         endian = endian,
