@@ -5,10 +5,16 @@ import FileHeader.ObjectFileTypeEnum.ObjecFileTypeEnum
 
 
 case class FileHeader (
-                 var wordLen: WordSizeEnum,
-                 var endian: EndianessENum,
-                 var osType: OsEnum,
-                 var objFileType: ObjecFileTypeEnum
+                        wordLen: WordSizeEnum,
+                        endian: EndianessENum,
+                        osType: OsEnum,
+                        objFileType: ObjecFileTypeEnum,
+                        phOffSet: Int,
+                        phEntSize: Int,
+                        phNum: Int,
+                        shOffSet: Int,
+                        shEntSize: Int,
+                        shNum: Int
                  )
 
 object FileHeader {

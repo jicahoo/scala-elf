@@ -49,33 +49,42 @@ class ElfFile(val filePath: String) {
     println(osType)
     val elfType = ObjectFileTypeEnum.apply(asInt(byteArray, FileHeader.elfType))
     println(elfType)
+
     assert(elfType == ObjectFileTypeEnum.ET_DYN)
     var metaData: MetaData = null;
      wordLen match {
       case WordSizeEnum.BIT32 => metaData = new MetaData32
       case WordSizeEnum.BIT64 => metaData = new MetaData64
     }
+
     if (WordSizeEnum.BIT32 == wordLen) {
       val progHdrOff = asInt(byteArray, metaData.phOff)
       println(progHdrOff)
       val phEntSize = asInt(byteArray, metaData.phEntSize)
-      println(s"A Program Entry Size: $phEntSize")
       val phEntNum = asInt(byteArray, metaData.phNum)
-      println(s"Program entry count: $phEntNum")
-
 
       val phType = asInt(byteArray, progHdrOff + 0x00, 4, endian)
       println(ProgHeaderTypeEnum.apply(phType))
 
       val sectHdrOff = asInt(byteArray, metaData.shOff)
 
-      println(s"Section Header Offset: ${sectHdrOff.toHexString}")
       val shEntSize = asInt(byteArray, metaData.shEntSize)
       val shEntNum = asInt(byteArray, metaData.shNum)
-      println(s"Section header size: $shEntSize, Section header number: $shEntNum ")
 
       //TODO: Builder pattern? better?
-      val fileHeader = FileHeader(wordLen, endian, osType, elfType)
+      val fileHeader = FileHeader(
+        wordLen = wordLen,
+        endian = endian,
+        osType = osType,
+        objFileType = elfType,
+        phOffSet = progHdrOff,
+        phEntSize = phEntSize,
+        phNum = phEntNum,
+        shOffSet =  sectHdrOff,
+        shEntSize = shEntSize,
+        shNum = shEntNum
+      )
+
       println(fileHeader)
 
       // Find the section .shstrtab
