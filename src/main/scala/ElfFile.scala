@@ -8,32 +8,25 @@ class ElfFile(val filePath: String) {
   private var _endian = EndianessEnum.LITTLE
   private var _byteArray: Array[Byte] = _
 
+
+  //Parsed data structure
+  private var _fileHeader:FileHeader = _
+  private var _phHeaders: List[ProgramHeader] = _
+  private var _shHeaders: List[SectionHeader] = _
+
   private def asInt(offSetSizePair: OffSetSizePair): Int = {
     asInt(_byteArray, offSetSizePair)
   }
-  private def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
-            endian: EndianessEnum.EndianessENum): Int = {
-    assert(byteCnt <= 4)
-    val sum = 0
-    var idxs = (idx until (idx + byteCnt)).toList
-    if (endian == EndianessEnum.BIG) {
-      idxs = idxs.reverse
-    }
 
-    idxs.zipWithIndex.map(e => (bytetArray(e._1.toInt) & 0xff) <<(8*e._2)).sum
-  }
 
   def asInt(byteArray: Array[Byte], offSetSizePair: OffSetSizePair): Int = {
      if (offSetSizePair.size == 1) {
        byteArray(offSetSizePair.offSet) & 0xff
      } else {
-       asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, _endian)
+       ParseUtils.asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, _endian)
      }
   }
 
-  def asInt(byteArray: Array[Byte], offSetSizePair: OffSetSizePair, endian: EndianessEnum.EndianessENum): Int = {
-    asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, endian)
-  }
 
   def printSummary(): Unit = {
     _byteArray = Files.readAllBytes(Paths.get(filePath))
@@ -81,21 +74,26 @@ class ElfFile(val filePath: String) {
         shNum = shEntNum
       )
 
-      println(fileHeader)
+      _fileHeader = fileHeader
+      println(_fileHeader)
 
-      //first ph
-      val phType = asInt(_byteArray, progHdrOff + 0x00, 4, endian)
-      println(ProgHeaderTypeEnum.apply(phType))
+      _phHeaders = ProgramHeader.parse(_byteArray,
+        _fileHeader.phOffSet,
+        _fileHeader.phEntSize,
+        _fileHeader.phNum,
+        _endian
+      )
+
 
       // Find the section .shstrtab
       val strTabSectHeaderIdx = sectHdrOff + (shEntNum - 1) * shEntSize
 
-      val shType = ShTypeEnum.apply(asInt(_byteArray, strTabSectHeaderIdx + 0x4, 4, endian))
+      val shType = ShTypeEnum.apply(ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x4, 4, endian))
       println(shType)
 
-      val sectionOffSet = asInt(_byteArray, strTabSectHeaderIdx + 0x10, 4, endian)
+      val sectionOffSet = ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x10, 4, endian)
       println(sectionOffSet)
-      val sectionSize = asInt(_byteArray, strTabSectHeaderIdx + 0x14, 4, endian)
+      val sectionSize = ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x14, 4, endian)
       println(sectionSize)
       (sectionOffSet until (sectionOffSet + sectionSize)).foreach(
         i => {
