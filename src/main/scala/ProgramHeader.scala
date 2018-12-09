@@ -29,6 +29,7 @@ object ProgramHeader {
     val classTest = classMirror.reflect(a)
     val cls = ProgHeaderTypeEnum.getClass
     val cSymbol = ru.runtimeMirror(cls.getClassLoader).classSymbol(cls)
+    //More clear doc: https://docs.scala-lang.org/overviews/reflection/overview.html
     //https://fair-jm.iteye.com/blog/2163746
     //https://stackoverflow.com/questions/15008367/convert-class-to-universe-type-symbol
     val classM = classMirror.reflectClass(cSymbol)
