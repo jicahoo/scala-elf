@@ -15,6 +15,7 @@ class People {
   var name: String = _
   var age: Int = _
   var gender: Boolean = _
+  var pType: ProgHeaderTypeEnum = _
 }
 
 
@@ -76,13 +77,24 @@ object ProgramHeader {
 
     val peopleClass = classMirror.reflect(p)
     //TODO: use reflection to pop the valeu to People.
-    val fieldName = "age"
+    val fieldNames = List("age", "pType")
 
-    val fieldTerm = ru.typeOf[People].decl(ru.TermName(fieldName)).asTerm
-    if (fieldTerm.info.resultType =:= ru.typeOf[Int]) {
-      println("I am Int")
-      peopleClass.reflectField(fieldTerm).set(map(fieldName).toInt)
-    }
+    fieldNames.foreach( fieldName => {
+        val fieldTerm = ru.typeOf[People].decl(ru.TermName(fieldName)).asTerm
+        val resultType = fieldTerm.info.resultType
+        if (resultType =:= ru.typeOf[Int]) {
+          println("I am Int")
+          peopleClass.reflectField(fieldTerm).set(map(fieldName).toInt)
+        } else if (resultType.toString.endsWith("Enum")) {
+          val applyMethod = resultType.decl(ru.TermName("apply"))
+          println(resultType.decls)
+          println(resultType.toString)
+          println(resultType.members)
+          println(applyMethod)
+        }
+      }
+    )
+
     println(p.age)
 
   }
