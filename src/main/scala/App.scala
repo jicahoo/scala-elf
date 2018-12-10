@@ -1,7 +1,5 @@
 import java.io.File
 
-import com.sun.jdi.Method
-
 import scala.reflect.runtime.{universe => ru}
 
 object App {

@@ -1,12 +1,22 @@
 import App.{Good, getClass}
 import FileHeader.EndianessEnum.EndianessENum
 import ProgramHeader.ProgHeaderTypeEnum.ProgHeaderTypeEnum
+
 import scala.reflect.runtime.{universe => ru}
 
 
 class ProgramHeader {
   var pType: ProgHeaderTypeEnum  = _
 }
+
+
+// Little goal
+class People {
+  var name: String = _
+  var age: Int = _
+  var gender: Boolean = _
+}
+
 
 object ProgramHeader {
 
@@ -20,6 +30,13 @@ object ProgramHeader {
     val phType = ParseUtils.asInt(byteArray, phOffSet + 0x00, 4, endian)
     println(ProgHeaderTypeEnum.apply(phType))
     null
+  }
+
+  def setVal[T](a: Any, fieldName: String, strVal: T): Unit = {
+    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
+    val classTest = classMirror.reflect(a)
+    val fieldX = ru.typeOf[Good].decl(ru.TermName(fieldName)).asTerm
+    classTest.reflectField(fieldX).set(strVal)
   }
 
   def main(args: Array[String]): Unit = {
@@ -53,6 +70,21 @@ object ProgramHeader {
     val xClass = x.getClass
     val xInst = xClass.newInstance()
     println(xInst.apply(0))
+
+    val p = new People
+    val map = Map("name" -> "jack", "age" -> "20", "gender" -> "1")
+
+    val peopleClass = classMirror.reflect(p)
+    //TODO: use reflection to pop the valeu to People.
+    val fieldName = "age"
+
+    val fieldTerm = ru.typeOf[People].decl(ru.TermName(fieldName)).asTerm
+    if (fieldTerm.info.resultType =:= ru.typeOf[Int]) {
+      println("I am Int")
+      peopleClass.reflectField(fieldTerm).set(map(fieldName).toInt)
+    }
+    println(p.age)
+
   }
 }
 
