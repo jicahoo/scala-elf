@@ -10,6 +10,7 @@ class ProgramHeader {
 }
 
 
+
 // Little goal
 class People {
   var name: String = _
@@ -19,8 +20,9 @@ class People {
 }
 
 
-object ProgramHeader {
 
+
+object ProgramHeader {
   object ProgHeaderTypeEnum extends Enumeration {
     type ProgHeaderTypeEnum = Value
     val PT_NULL, PT_LOAD, PT_DYNAMIC, PT_INTERP, PT_NOTE, PT_SHLIB, PT_PHDR = Value
@@ -39,6 +41,7 @@ object ProgramHeader {
     val fieldX = ru.typeOf[Good].decl(ru.TermName(fieldName)).asTerm
     classTest.reflectField(fieldX).set(strVal)
   }
+
 
   def main(args: Array[String]): Unit = {
     println("ProgramHeader")
@@ -69,8 +72,8 @@ object ProgramHeader {
     phHeaderClass.getFields.foreach(x => println(s"Again: $x"))
 //
     val xClass = x.getClass
-    val xInst = xClass.newInstance()
-    println(xInst.apply(0))
+//    val xInst = xClass.newInstance()
+//    println(xInst.apply(0))
 
     val p = new People
     val map = Map("name" -> "jack", "age" -> "20", "gender" -> "1")
@@ -87,15 +90,18 @@ object ProgramHeader {
           peopleClass.reflectField(fieldTerm).set(map(fieldName).toInt)
         } else if (resultType.toString.endsWith("Enum")) {
           val applyMethod = resultType.decl(ru.TermName("apply"))
-          println(resultType.decls)
-          println(resultType.toString)
-          println(resultType.members)
-          println(applyMethod)
+
+          val enumPkgPath = resultType.toString.replaceAll("""\.[A-Za-z]*Enum$""","")
+          val module = classMirror.staticModule(enumPkgPath)
+          val obj = classMirror.reflectModule(module)
+          val enumVal = obj.instance.asInstanceOf[Enumeration].apply(1)
+          peopleClass.reflectField(fieldTerm).set(enumVal)
         }
       }
     )
 
     println(p.age)
+    println(p.pType)
 
   }
 }

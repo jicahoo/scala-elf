@@ -1,5 +1,7 @@
 import java.time.OffsetDateTime
 
+import ProgramHeader.ProgHeaderTypeEnum
+
 abstract class ProgramHeaderMetaData {
   def pType: OffSetSizePair
   //TODO: no need these methods: ProgramHeader.member.getType.
@@ -33,5 +35,5 @@ class ProgramHeaderMetaData32 extends ProgramHeaderMetaData {
 
   override def pTypeTargetType: Class[_] = Int.getClass
 
-  override def pFlagsTargetType: Class[_] = ProgramHeader.ProgHeaderTypeEnum.getClass
+  override def pFlagsTargetType: Class[_] = ProgHeaderTypeEnum.getClass
 }
