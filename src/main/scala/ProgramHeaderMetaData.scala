@@ -36,9 +36,6 @@ object ProgramHeaderMetaData32 {
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
     val progHeaderMetaData = new ProgramHeaderMetaData32
     val classTest = classMirror.reflect(progHeaderMetaData)
-//    val result = classTest.reflectMethod(method)("zzzzzzzzzzzzzzzzzzzz")
-
-    //Scala style
     val typeOfProgHeaderMetaData = ru.typeOf[ProgramHeaderMetaData32]
     val methods = typeOfProgHeaderMetaData.decls
     val methodNames = methods
@@ -50,11 +47,9 @@ object ProgramHeaderMetaData32 {
         .foreach(
           x => {
             val y = classTest.reflectMethod(x.asMethod)()
-            println(y)
+            println(y.asInstanceOf[OffSetSizePair].offSet)
           }
         )
     println(methodNames)
-
-
   }
 }

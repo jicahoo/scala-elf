@@ -27,6 +27,7 @@ class ElfFile(val filePath: String) {
      }
   }
 
+  def fileHeader: FileHeader = _fileHeader
 
   def printSummary(): Unit = {
     _byteArray = Files.readAllBytes(Paths.get(filePath))
