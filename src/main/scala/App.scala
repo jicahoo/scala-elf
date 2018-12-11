@@ -43,16 +43,6 @@ object App {
   }
 
   def main(args: Array[String]): Unit = {
-    println("Hello")
-    val x = Int.getClass
-    methodReflectDemo()
-    val g = new Good
-    val b = new Better
-    setVal(g, "a","xxxxxxxxxxxxxx")
-    println(g.a)
-    setVal(g, "b", "yyyyyyyy")
-    println(g.b)
-
     var pwd = new File(".").getAbsolutePath
     println(pwd)
     val filePath = "src/main/resources/libxml2.so.2.9.1"

@@ -7,20 +7,15 @@ import scala.reflect.runtime.{universe => ru}
 
 class ProgramHeader {
   var pType: ProgHeaderTypeEnum  = _
+  var pVirtualAddr: Int = _
 }
 
-
-
-// Little goal
 class People {
   var name: String = _
   var age: Int = _
   var gender: Boolean = _
   var pType: ProgHeaderTypeEnum = _
 }
-
-
-
 
 object ProgramHeader {
   object ProgHeaderTypeEnum extends Enumeration {
@@ -44,37 +39,8 @@ object ProgramHeader {
 
 
   def main(args: Array[String]): Unit = {
-    println("ProgramHeader")
-    val a = new ProgramHeader
+
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
-    val classTest = classMirror.reflect(a)
-    val cls = ProgHeaderTypeEnum.getClass
-    val cSymbol = ru.runtimeMirror(cls.getClassLoader).classSymbol(cls)
-    //More clear doc: https://docs.scala-lang.org/overviews/reflection/overview.html
-    //https://fair-jm.iteye.com/blog/2163746
-    //https://stackoverflow.com/questions/15008367/convert-class-to-universe-type-symbol
-    val classM = classMirror.reflectClass(cSymbol)
-    println(classM)
-    val fieldX = ru.typeOf[ProgramHeader].decl(ru.TermName("pType")).asTerm
-    println(fieldX)
-    println(fieldX.info.resultType.eq(ru.typeOf[ProgHeaderTypeEnum]))
-    println(ru.typeOf[ProgHeaderTypeEnum])
-    val x = ProgHeaderTypeEnum
-    val y = ru.typeOf[ProgHeaderTypeEnum]
-    val yDecls = y.decls
-    println(yDecls)
-
-    val phHeaderClass = ProgramHeader.getClass
-    val pType = phHeaderClass.getDeclaredFields
-    phHeaderClass.getDeclaredMethods.foreach(x => println(s"World: $x"))
-
-    pType.foreach(x => println(s"Hello:$x"))
-    phHeaderClass.getFields.foreach(x => println(s"Again: $x"))
-//
-    val xClass = x.getClass
-//    val xInst = xClass.newInstance()
-//    println(xInst.apply(0))
-
     val p = new People
     val map = Map("name" -> "jack", "age" -> "20", "gender" -> "1")
 
@@ -89,8 +55,6 @@ object ProgramHeader {
           println("I am Int")
           peopleClass.reflectField(fieldTerm).set(map(fieldName).toInt)
         } else if (resultType.toString.endsWith("Enum")) {
-          val applyMethod = resultType.decl(ru.TermName("apply"))
-
           val enumPkgPath = resultType.toString.replaceAll("""\.[A-Za-z]*Enum$""","")
           val module = classMirror.staticModule(enumPkgPath)
           val obj = classMirror.reflectModule(module)

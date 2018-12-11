@@ -1,13 +1,10 @@
-import java.time.OffsetDateTime
-
 import ProgramHeader.ProgHeaderTypeEnum
+import scala.reflect.runtime.{universe => ru}
+
 
 abstract class ProgramHeaderMetaData {
   def pType: OffSetSizePair
-  //TODO: no need these methods: ProgramHeader.member.getType.
-  def pTypeTargetType: Class[_]
   def pFlags: OffSetSizePair
-  def pFlagsTargetType: Class[_]
   def pOffset: OffSetSizePair
   def pVirtualAddr: OffSetSizePair
   def pPhysicalAddr: OffSetSizePair
@@ -32,8 +29,32 @@ class ProgramHeaderMetaData32 extends ProgramHeaderMetaData {
   override def pFlags: OffSetSizePair = OffSetSizePair(0x18, 4)
 
   override def pAlgin: OffSetSizePair = OffSetSizePair(0x1C, 4)
+}
 
-  override def pTypeTargetType: Class[_] = Int.getClass
+object ProgramHeaderMetaData32 {
+  def main(args: Array[String]): Unit = {
+    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
+    val progHeaderMetaData = new ProgramHeaderMetaData32
+    val classTest = classMirror.reflect(progHeaderMetaData)
+//    val result = classTest.reflectMethod(method)("zzzzzzzzzzzzzzzzzzzz")
 
-  override def pFlagsTargetType: Class[_] = ProgHeaderTypeEnum.getClass
+    //Scala style
+    val typeOfProgHeaderMetaData = ru.typeOf[ProgramHeaderMetaData32]
+    val methods = typeOfProgHeaderMetaData.decls
+    val methodNames = methods
+      .filter(m => m.isMethod && ! m.isConstructor)
+      .map(_.asMethod.name.toString)
+
+    methods
+      .filter(m => m.isMethod && ! m.isConstructor)
+        .foreach(
+          x => {
+            val y = classTest.reflectMethod(x.asMethod)()
+            println(y)
+          }
+        )
+    println(methodNames)
+
+
+  }
 }
