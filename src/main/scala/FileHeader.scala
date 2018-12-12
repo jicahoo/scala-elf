@@ -1,23 +1,24 @@
 import FileHeader.EndianessEnum.EndianessENum
+import FileHeader.ObjectFileTypeEnum.ObjecFileTypeEnum
 import FileHeader.OsEnum.OsEnum
 import FileHeader.WordSizeEnum.WordSizeEnum
-import FileHeader.ObjectFileTypeEnum.ObjecFileTypeEnum
 
 
-case class FileHeader (
-                        wordLen: WordSizeEnum,
-                        endian: EndianessENum,
-                        osType: OsEnum,
-                        objFileType: ObjecFileTypeEnum,
-                        phOffSet: Int,
-                        phEntSize: Int,
-                        phNum: Int,
-                        shOffSet: Int,
-                        shEntSize: Int,
-                        shNum: Int
-                 )
+case class FileHeader(
+                       wordLen: WordSizeEnum,
+                       endian: EndianessENum,
+                       osType: OsEnum,
+                       objFileType: ObjecFileTypeEnum,
+                       phOffSet: Int,
+                       phEntSize: Int,
+                       phNum: Int,
+                       shOffSet: Int,
+                       shEntSize: Int,
+                       shNum: Int
+                     )
 
 object FileHeader {
+
   object WordSizeEnum extends Enumeration {
     type WordSizeEnum = Value
     val UNKNOWN, BIT32, BIT64 = Value

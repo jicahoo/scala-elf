@@ -1,7 +1,6 @@
 import java.nio.file.{Files, Paths}
 
 import FileHeader._
-import ProgramHeader._
 import SectionHeader._
 
 class ElfFile(val filePath: String) {
@@ -10,7 +9,7 @@ class ElfFile(val filePath: String) {
 
 
   //Parsed data structure
-  private var _fileHeader:FileHeader = _
+  private var _fileHeader: FileHeader = _
   private var _phHeaders: List[ProgramHeader] = _
   private var _shHeaders: List[SectionHeader] = _
 
@@ -20,11 +19,11 @@ class ElfFile(val filePath: String) {
 
 
   def asInt(byteArray: Array[Byte], offSetSizePair: OffSetSizePair): Int = {
-     if (offSetSizePair.size == 1) {
-       byteArray(offSetSizePair.offSet) & 0xff
-     } else {
-       ParseUtils.asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, _endian)
-     }
+    if (offSetSizePair.size == 1) {
+      byteArray(offSetSizePair.offSet) & 0xff
+    } else {
+      ParseUtils.asInt(byteArray, offSetSizePair.offSet, offSetSizePair.size, _endian)
+    }
   }
 
   def fileHeader: FileHeader = _fileHeader
@@ -35,20 +34,20 @@ class ElfFile(val filePath: String) {
 
     println(s"Byte size: ${_byteArray.length}")
     val magicNum = Array[Byte](0x7f.toByte, 'E'.toByte, 'L'.toByte, 'F'.toByte)
-    if (!_byteArray.slice(0,4).sameElements(magicNum)) {
+    if (!_byteArray.slice(0, 4).sameElements(magicNum)) {
       throw new IllegalArgumentException("Magic number is not '.ELF'.Maybe not a ELF file.")
     }
 
     val wordLenTag = asInt(IdentMetaData.ET_CLASS)
     val wordLen = WordSizeEnum.apply(wordLenTag)
     val endian = EndianessEnum.apply(asInt(IdentMetaData.ET_DATA))
-    _endian  = endian
+    _endian = endian
     val osType = OsEnum.apply(asInt(IdentMetaData.ET_OSABI))
     val elfType = ObjectFileTypeEnum.apply(asInt(FileHeader.elfType))
 
     assert(elfType == ObjectFileTypeEnum.ET_DYN)
     var metaData: MetaData = null
-     wordLen match {
+    wordLen match {
       case WordSizeEnum.BIT32 => metaData = new MetaData32
       case WordSizeEnum.BIT64 => metaData = new MetaData64
     }
@@ -70,7 +69,7 @@ class ElfFile(val filePath: String) {
         phOffSet = progHdrOff,
         phEntSize = phEntSize,
         phNum = phEntNum,
-        shOffSet =  sectHdrOff,
+        shOffSet = sectHdrOff,
         shEntSize = shEntSize,
         shNum = shEntNum
       )

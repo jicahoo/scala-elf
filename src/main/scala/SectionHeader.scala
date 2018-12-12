@@ -4,6 +4,7 @@ abstract class SectionHeader {
 }
 
 object SectionHeader {
+
   object ShTypeEnum extends Enumeration {
     type ShTypeEnum = Value
     val SHT_NULL, SHT_PROGBITS, SHT_SYMTAB, SHT_STRTAB, SHT_RELA, SHT_HASH, SHT_DYNAMIC, SHT_NOTE = Value

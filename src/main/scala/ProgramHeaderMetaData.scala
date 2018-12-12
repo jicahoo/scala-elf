@@ -1,15 +1,21 @@
-import ProgramHeader.ProgHeaderTypeEnum
 import scala.reflect.runtime.{universe => ru}
 
 
 abstract class ProgramHeaderMetaData {
   def pType: OffSetSizePair
+
   def pFlags: OffSetSizePair
+
   def pOffset: OffSetSizePair
+
   def pVirtualAddr: OffSetSizePair
+
   def pPhysicalAddr: OffSetSizePair
+
   def pFileSize: OffSetSizePair
+
   def pMemSize: OffSetSizePair
+
   def pAlgin: OffSetSizePair
 }
 
@@ -39,17 +45,17 @@ object ProgramHeaderMetaData32 {
     val typeOfProgHeaderMetaData = ru.typeOf[ProgramHeaderMetaData32]
     val methods = typeOfProgHeaderMetaData.decls
     val methodNames = methods
-      .filter(m => m.isMethod && ! m.isConstructor)
+      .filter(m => m.isMethod && !m.isConstructor)
       .map(_.asMethod.name.toString)
 
     methods
-      .filter(m => m.isMethod && ! m.isConstructor)
-        .foreach(
-          x => {
-            val y = classTest.reflectMethod(x.asMethod)()
-            println(y.asInstanceOf[OffSetSizePair].offSet)
-          }
-        )
+      .filter(m => m.isMethod && !m.isConstructor)
+      .foreach(
+        x => {
+          val y = classTest.reflectMethod(x.asMethod)()
+          println(y.asInstanceOf[OffSetSizePair].offSet)
+        }
+      )
     println(methodNames)
   }
 }

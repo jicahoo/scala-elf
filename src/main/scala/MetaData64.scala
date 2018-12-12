@@ -10,5 +10,5 @@ class MetaData64 extends MetaData {
 
   override def shEntSize: OffSetSizePair = null
 
-  override def shNum: OffSetSizePair =  null
+  override def shNum: OffSetSizePair = null
 }

@@ -5,17 +5,18 @@ import scala.reflect.runtime.{universe => ru}
 object App {
 
   class Good {
-    var a:String = _
-    var b:String = _
-    var c:String = _
+    var a: String = _
+    var b: String = _
+    var c: String = _
+
     def setMyVal(v: String): Unit = {
       println("O was called")
       a = v
     }
   }
 
-  case class Better (var a:String=null,
-                     var b:String=null)
+  case class Better(var a: String = null,
+                    var b: String = null)
 
   def setVal[T](a: Any, fieldName: String, strVal: T): Unit = {
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)

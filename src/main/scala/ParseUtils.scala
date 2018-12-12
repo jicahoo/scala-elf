@@ -2,7 +2,7 @@ import FileHeader.EndianessEnum
 
 object ParseUtils {
   def asInt(bytetArray: Array[Byte], idx: Int, byteCnt: Int,
-                    endian: EndianessEnum.EndianessENum): Int = {
+            endian: EndianessEnum.EndianessENum): Int = {
     assert(byteCnt <= 4)
     val sum = 0
     var idxs = (idx until (idx + byteCnt)).toList
@@ -18,7 +18,7 @@ object ParseUtils {
   }
 
   def asInt(byteArray: Array[Byte],
-            globalOffSet:Int,
+            globalOffSet: Int,
             offSetSizePair: OffSetSizePair,
             endian: EndianessEnum.EndianessENum): Int = {
     ParseUtils.asInt(byteArray, globalOffSet + offSetSizePair.offSet, offSetSizePair.size, endian)
