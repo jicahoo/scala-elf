@@ -16,7 +16,7 @@ abstract class ProgramHeaderMetaData {
 
   def pMemSize: OffSetSizePair
 
-  def pAlgin: OffSetSizePair
+  def pAlign: OffSetSizePair
 }
 
 class ProgramHeaderMetaData32 extends ProgramHeaderMetaData {
@@ -34,7 +34,7 @@ class ProgramHeaderMetaData32 extends ProgramHeaderMetaData {
 
   override def pFlags: OffSetSizePair = OffSetSizePair(0x18, 4)
 
-  override def pAlgin: OffSetSizePair = OffSetSizePair(0x1C, 4)
+  override def pAlign: OffSetSizePair = OffSetSizePair(0x1C, 4)
 }
 
 object ProgramHeaderMetaData32 {

@@ -9,18 +9,17 @@ import scala.reflect.ClassTag
 import scala.reflect.runtime.{universe => ru}
 
 
-case class ProgramHeader(var pType: ProgHeaderTypeEnum, var pVirtualAddr: Int, var pMemSize: Int) {
-  //  var pType: ProgHeaderTypeEnum  = _
-  //  var pVirtualAddr: Int = _
-  //  var pMemSize: Int = _
-}
+case class ProgramHeader(
+                          var pType: ProgHeaderTypeEnum = ProgramHeader.ProgHeaderTypeEnum.PT_NULL,
+                          var pOffset: Int = 0,
+                          var pVirtualAddr: Int = 0,
+                          var pPhysicalAddr: Int = 0,
+                          var pMemSize: Int = 0,
+                          var pFileSize: Int = 0,
+                          var pFlags: Int = 0,
+                          var pAlign: Int = 0
+                        )
 
-class People {
-  var name: String = _
-  var age: Int = _
-  var gender: Boolean = _
-  var pType: ProgHeaderTypeEnum = _
-}
 
 object ProgramHeader {
 
@@ -45,33 +44,6 @@ object ProgramHeader {
 
 
   def main(args: Array[String]): Unit = {
-
-    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
-    val p = new People
-    val map = Map("name" -> "jack", "age" -> "20", "gender" -> "1")
-
-    val peopleClass = classMirror.reflect(p)
-    //TODO: use reflection to pop the valeu to People.
-    val fieldNames = List("age", "pType")
-
-    fieldNames.foreach(fieldName => {
-      val fieldTerm = ru.typeOf[People].decl(ru.TermName(fieldName)).asTerm
-      val resultType = fieldTerm.info.resultType
-      if (resultType =:= ru.typeOf[Int]) {
-        println("I am Int")
-        peopleClass.reflectField(fieldTerm).set(map(fieldName).toInt)
-      } else if (resultType.toString.endsWith("Enum")) {
-        val enumPkgPath = resultType.toString.replaceAll("""\.[A-Za-z]*Enum$""", "")
-        val module = classMirror.staticModule(enumPkgPath)
-        val obj = classMirror.reflectModule(module)
-        val enumVal = obj.instance.asInstanceOf[Enumeration].apply(1)
-        peopleClass.reflectField(fieldTerm).set(enumVal)
-      }
-    }
-    )
-
-    println(p.age)
-    println(p.pType)
     val progHeaderMetaData = new ProgramHeaderMetaData32
     val filePath = "src/main/resources/libxml2.so.2.9.1"
     val byteArray = Files.readAllBytes(Paths.get(filePath))
@@ -106,7 +78,7 @@ object ProgramHeader {
                  endian: EndianessENum
                 ): ProgramHeader = {
 
-    val progHeader = new ProgramHeader(ProgHeaderTypeEnum.PT_NULL, 0, 0)
+    val progHeader = new ProgramHeader()
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
     val classTest = classMirror.reflect(progHeaderMetaData)
     val typeOfProgHeaderMetaData = ru.typeOf[ProgramHeaderMetaData]
