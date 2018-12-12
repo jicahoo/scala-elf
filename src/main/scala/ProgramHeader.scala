@@ -88,14 +88,8 @@ object ProgramHeader {
                  targetObjType: ru.Type
                 ): AnyRef = {
 
-//    val targetObj = new ProgramHeader()
-
-//    val metaDataType = ru.typeOf[ProgramHeaderMetaData]
-//    val targetObjType = ru.typeOf[ProgramHeader]
-
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
     val classTest = classMirror.reflect(metaDataObj)
-
 
     val methods = metaDataType.decls
 
