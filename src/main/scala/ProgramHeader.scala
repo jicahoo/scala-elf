@@ -49,7 +49,14 @@ object ProgramHeader {
     val byteArray = Files.readAllBytes(Paths.get(filePath))
     val elfFile = new ElfFile(filePath)
     elfFile.printSummary()
-    progHeader(elfFile.fileHeader.phOffSet, progHeaderMetaData, byteArray, EndianessEnum.LITTLE)
+    val targetObjType  = ru.typeOf[ProgramHeader]
+    val targetObj = new ProgramHeader()
+    val metaDataType = ru.typeOf[ProgramHeaderMetaData]
+    progHeader(elfFile.fileHeader.phOffSet, progHeaderMetaData, targetObj, byteArray, EndianessEnum.LITTLE,
+      metaDataType,
+      targetObjType
+    )
+    println(CaseClassBeautifier.nice(targetObj))
   }
 
   object CaseClassBeautifier {
@@ -73,19 +80,24 @@ object ProgramHeader {
   }
 
   def progHeader(phOffSet: Int,
-                 progHeaderMetaData: ProgramHeaderMetaData,
+                 metaDataObj: AnyRef,
+                 targetObj: AnyRef,
                  byteArray: Array[Byte],
-                 endian: EndianessENum
-                ): ProgramHeader = {
+                 endian: EndianessENum,
+                 metaDataType: ru.Type,
+                 targetObjType: ru.Type
+                ): AnyRef = {
 
-    val progHeader = new ProgramHeader()
+//    val targetObj = new ProgramHeader()
+
+//    val metaDataType = ru.typeOf[ProgramHeaderMetaData]
+//    val targetObjType = ru.typeOf[ProgramHeader]
+
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
-    val classTest = classMirror.reflect(progHeaderMetaData)
-    val typeOfProgHeaderMetaData = ru.typeOf[ProgramHeaderMetaData]
-    val methods = typeOfProgHeaderMetaData.decls
-    val methodNames = methods
-      .filter(m => m.isMethod && !m.isConstructor)
-      .map(_.asMethod.name.toString)
+    val classTest = classMirror.reflect(metaDataObj)
+
+
+    val methods = metaDataType.decls
 
     methods
       .filter(m => m.isMethod && !m.isConstructor)
@@ -97,11 +109,11 @@ object ProgramHeader {
           val fieldName = x.asMethod.name.toString
           println(y.asInstanceOf[OffSetSizePair])
           println(s"$fieldName intValue: ${intVal.toHexString}")
-          val fieldTermSymbol = ru.typeOf[ProgramHeader].decl(ru.TermName(fieldName))
+          val fieldTermSymbol = targetObjType.decl(ru.TermName(fieldName))
           if (fieldTermSymbol.isTerm) {
             val fieldTerm = fieldTermSymbol.asTerm
             val resultType = fieldTerm.info.resultType
-            val progClass = classMirror.reflect(progHeader)
+            val progClass = classMirror.reflect(targetObj)
 
             if (resultType =:= ru.typeOf[Int]) {
               progClass.reflectField(fieldTerm).set(intVal)
@@ -118,8 +130,8 @@ object ProgramHeader {
           }
         }
       )
-    println(CaseClassBeautifier.nice(progHeader))
-    progHeader
+    //println(CaseClassBeautifier.nice(targetObj)) Not worked after change targetObj type from ProgramHeader to AnyRef
+    targetObj
   }
 
 }
