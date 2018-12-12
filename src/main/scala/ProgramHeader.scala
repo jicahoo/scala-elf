@@ -5,12 +5,14 @@ import FileHeader.EndianessEnum
 import FileHeader.EndianessEnum.EndianessENum
 import ProgramHeader.ProgHeaderTypeEnum.ProgHeaderTypeEnum
 
+import scala.reflect.ClassTag
 import scala.reflect.runtime.{universe => ru}
 
 
-class ProgramHeader {
-  var pType: ProgHeaderTypeEnum  = _
-  var pVirtualAddr: Int = _
+case class ProgramHeader( var pType: ProgHeaderTypeEnum, var pVirtualAddr: Int, var pMemSize: Int ) {
+//  var pType: ProgHeaderTypeEnum  = _
+//  var pVirtualAddr: Int = _
+//  var pMemSize: Int = _
 }
 
 class People {
@@ -77,13 +79,33 @@ object ProgramHeader {
     progHeader(elfFile.fileHeader.phOffSet, progHeaderMetaData, byteArray, EndianessEnum.LITTLE)
   }
 
+  object CaseClassBeautifier {
+    private def getCaseAccessors[T: ru.TypeTag] = ru.typeOf[T].members.collect { case m: ru.MethodSymbol if m.isCaseAccessor => m }
+      .toList
+
+    def nice[T: ru.TypeTag](x: T)(implicit classTag: ClassTag[T]): String = {
+      val instance = x.asInstanceOf[T]
+      val mirror = ru.runtimeMirror(instance.getClass.getClassLoader)
+      val accessors = getCaseAccessors[T]
+      var res = List.empty[String]
+      accessors.foreach { z ⇒
+        val instanceMirror = mirror.reflect(instance)
+        val fieldMirror = instanceMirror.reflectField(z.asTerm)
+        val s = s"${z.name} = ${fieldMirror.get}"
+        res = s :: res
+      }
+      val beautified = x.getClass.getSimpleName + "(" + res.mkString(", ") + ")"
+      beautified
+    }
+  }
+
   def progHeader( phOffSet: Int,
                   progHeaderMetaData: ProgramHeaderMetaData,
                  byteArray: Array[Byte],
                  endian: EndianessENum
                 ): ProgramHeader = {
 
-    val progHeader = new ProgramHeader
+    val progHeader = new ProgramHeader(ProgHeaderTypeEnum.PT_NULL,0,0)
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
     val classTest = classMirror.reflect(progHeaderMetaData)
     val typeOfProgHeaderMetaData = ru.typeOf[ProgramHeaderMetaData]
@@ -99,9 +121,9 @@ object ProgramHeader {
           val y = classTest.reflectMethod(x.asMethod)()
           println(y.asInstanceOf[OffSetSizePair].offSet)
           val intVal = ParseUtils.asInt(byteArray, phOffSet, y.asInstanceOf[OffSetSizePair], endian)
-          println(y.asInstanceOf[OffSetSizePair])
-          println(s"intValue: ${intVal.toHexString}")
           val fieldName = x.asMethod.name.toString
+          println(y.asInstanceOf[OffSetSizePair])
+          println(s"$fieldName intValue: ${intVal.toHexString}")
           val temp = ru.typeOf[ProgramHeader].decl(ru.TermName(fieldName))
           println(fieldName)
           println(temp)
@@ -116,7 +138,6 @@ object ProgramHeader {
             val progClass = classMirror.reflect(progHeader)
 
             if (resultType =:= ru.typeOf[Int]) {
-              println("I am Int")
               progClass.reflectField(fieldTerm).set(intVal)
             } else if (resultType.toString.endsWith("Enum")) {
               println(resultType.toString)
@@ -130,9 +151,7 @@ object ProgramHeader {
           }
         }
       )
-    println((0 until 10).map(_ => "*").mkString)
-    println(progHeader.pType)
-    println(progHeader.pVirtualAddr)
+    println(CaseClassBeautifier.nice(progHeader))
     progHeader
   }
 
