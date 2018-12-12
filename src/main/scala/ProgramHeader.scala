@@ -125,29 +125,23 @@ object ProgramHeader {
           val fieldName = x.asMethod.name.toString
           println(y.asInstanceOf[OffSetSizePair])
           println(s"$fieldName intValue: ${intVal.toHexString}")
-          val temp = ru.typeOf[ProgramHeader].decl(ru.TermName(fieldName))
-          println(fieldName)
-          println(temp)
-          val fieldNames = ru.typeOf[ProgramHeader].decls
-            .filter(x => (!x.isConstructor) && (!x.isMethod))
-            .map(_.asTerm.name.toString.trim).toList
-          println(s"$fieldNames : $fieldName")
-          if (fieldNames.contains(fieldName)) {
-            println((0 until 10).map(_ => "##").mkString)
-            val fieldTerm = ru.typeOf[ProgramHeader].decl(ru.TermName(fieldName)).asTerm
+          val fieldTermSymbol = ru.typeOf[ProgramHeader].decl(ru.TermName(fieldName))
+          if (fieldTermSymbol.isTerm) {
+            val fieldTerm = fieldTermSymbol.asTerm
             val resultType = fieldTerm.info.resultType
             val progClass = classMirror.reflect(progHeader)
 
             if (resultType =:= ru.typeOf[Int]) {
               progClass.reflectField(fieldTerm).set(intVal)
-            } else if (resultType.toString.endsWith("Enum")) {
-              println(resultType.toString)
-              val enumPkgPath = resultType.toString.replaceAll("""\.[A-Za-z]*Enum$""", "")
+            } else if (resultType <:< ru.typeOf[Enumeration#Value]) {
+              val enumPkgPath = resultType.toString.split("""\.""").dropRight(1).mkString(".")
+              println(enumPkgPath)
               val module = classMirror.staticModule(enumPkgPath)
               val obj = classMirror.reflectModule(module)
-              println(intVal.toHexString)
               val enumVal = obj.instance.asInstanceOf[Enumeration].apply(intVal)
               progClass.reflectField(fieldTerm).set(enumVal)
+            } else {
+              throw new IllegalStateException(s"Don't know how to parse the resultType: ${resultType.toString}")
             }
           }
         }
