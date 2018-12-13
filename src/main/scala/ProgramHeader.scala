@@ -30,9 +30,22 @@ object ProgramHeader {
   }
 
   def parse(byteArray: Array[Byte], phOffSet: Int, phEntSize: Int, phNum: Int, endian: EndianessENum): List[ProgramHeader] = {
-    val phType = ParseUtils.asInt(byteArray, phOffSet + 0x00, 4, endian)
-    println(ProgHeaderTypeEnum.apply(phType))
-    null
+    (0 until phNum).map(phOffSet + _ * phEntSize).map(
+      offSet => {
+        println(s"========offSet: $offSet")
+        val progHeaderMetaData = new ProgramHeaderMetaData32
+        val targetObjType  = ru.typeOf[ProgramHeader]
+        val targetObj = new ProgramHeader()
+        val metaDataType = ru.typeOf[ProgramHeaderMetaData]
+        progHeader(offSet, progHeaderMetaData, targetObj, byteArray, EndianessEnum.LITTLE,
+          metaDataType,
+          targetObjType
+        )
+        println("Nice")
+        println(targetObj)
+        targetObj
+      }
+    ).toList
   }
 
   def setVal[T](a: Any, fieldName: String, strVal: T): Unit = {
@@ -102,7 +115,7 @@ object ProgramHeader {
           val intVal = ParseUtils.asInt(byteArray, phOffSet, y.asInstanceOf[OffSetSizePair], endian)
           val fieldName = x.asMethod.name.toString
           println(y.asInstanceOf[OffSetSizePair])
-          println(s"$fieldName intValue: ${intVal.toHexString}")
+          println(s"$fieldName intValue: 0x${intVal.toHexString}")
           val fieldTermSymbol = targetObjType.decl(ru.TermName(fieldName))
           if (fieldTermSymbol.isTerm) {
             val fieldTerm = fieldTermSymbol.asTerm
