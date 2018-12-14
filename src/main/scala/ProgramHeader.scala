@@ -26,7 +26,19 @@ object ProgramHeader {
   object ProgHeaderTypeEnum extends Enumeration {
     type ProgHeaderTypeEnum = Value
     val PT_NULL, PT_LOAD, PT_DYNAMIC, PT_INTERP, PT_NOTE, PT_SHLIB, PT_PHDR = Value
-    val PT_LOOS = Value(0x60000000)
+    val PT_LOOS:ProgHeaderTypeEnum = Value(0x60000000)
+    //https://github.com/comex/cs/blob/master/elfconst.py
+    val PT_GNU_EH_FRAME: ProgHeaderTypeEnum = Value(0x6474e550)
+    val PT_GNU_STACK: ProgHeaderTypeEnum = Value(0x6474e551)
+    val PT_GNU_RELRO: ProgHeaderTypeEnum = Value(0x6474e552)
+    val PT_LOSUNW: ProgHeaderTypeEnum = Value(0x6ffffffa)
+//    val PT_SUNWBSS = Value(0x6ffffffa)
+    val PT_SUNWSTACK: ProgHeaderTypeEnum = Value(0x6ffffffb)
+    val PT_HISUNW:ProgHeaderTypeEnum = Value(0x6fffffff)
+    //HIOS = 0x6fffffff,
+    val PT_LOPROC: ProgHeaderTypeEnum = Value(0x70000000)
+    val PT_HIPROC:ProgHeaderTypeEnum = Value(0x7fffffff)
+
   }
 
   def parse(byteArray: Array[Byte], phOffSet: Int, phEntSize: Int, phNum: Int, endian: EndianessENum): List[ProgramHeader] = {
