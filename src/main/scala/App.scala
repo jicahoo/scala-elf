@@ -1,6 +1,7 @@
-import java.io.File
+import java.io.{ByteArrayInputStream, File}
 
 import scala.reflect.runtime.{universe => ru}
+import sys.process._
 
 object App {
 
@@ -50,7 +51,12 @@ object App {
     val elfFile = new ElfFile(filePath)
     elfFile.printSummary()
 
-
+    val stdout = new StringBuilder
+    val stderr = new StringBuilder
+    val status = "ls wxx" ! ProcessLogger(stdout.append(_), stderr append _)
+    val x = "ls".lineStream_!.getClass
+    println(x)
+    println(s"status: $status,\n stdout: ${stdout.toString},\n stderr: ${stderr.toString}\n")
   }
 
 }

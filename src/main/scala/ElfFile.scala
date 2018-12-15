@@ -84,6 +84,9 @@ class ElfFile(val filePath: String) {
         _endian
       )
 
+      _shHeaders = SectionHeader.parse(_byteArray , sectHdrOff, shEntSize, shEntNum, endian)
+      _shHeaders.foreach( x => println(x.flags.map(_.toString).mkString("|")))
+
 
       // Find the section .shstrtab
       val strTabSectHeaderIdx = sectHdrOff + (shEntNum - 1) * shEntSize

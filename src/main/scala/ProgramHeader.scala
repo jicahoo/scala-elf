@@ -60,7 +60,10 @@ object ProgramHeader {
     ).toList
   }
 
-  def setVal[T](a: Any, fieldName: String, strVal: T): Unit = {
+
+
+
+    def setVal[T](a: Any, fieldName: String, strVal: T): Unit = {
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
     val classTest = classMirror.reflect(a)
     val fieldX = ru.typeOf[Good].decl(ru.TermName(fieldName)).asTerm
@@ -123,7 +126,6 @@ object ProgramHeader {
       .foreach(
         x => {
           val y = classTest.reflectMethod(x.asMethod)()
-          println(y.asInstanceOf[OffSetSizePair].offSet)
           val intVal = ParseUtils.asInt(byteArray, phOffSet, y.asInstanceOf[OffSetSizePair], endian)
           val fieldName = x.asMethod.name.toString
           println(y.asInstanceOf[OffSetSizePair])
@@ -138,11 +140,15 @@ object ProgramHeader {
               progClass.reflectField(fieldTerm).set(intVal)
             } else if (resultType <:< ru.typeOf[Enumeration#Value]) {
               val enumPkgPath = resultType.toString.split("""\.""").dropRight(1).mkString(".")
-              println(enumPkgPath)
               val module = classMirror.staticModule(enumPkgPath)
               val obj = classMirror.reflectModule(module)
-              val enumVal = obj.instance.asInstanceOf[Enumeration].apply(intVal)
-              progClass.reflectField(fieldTerm).set(enumVal)
+              try {
+                val enumVal = obj.instance.asInstanceOf[Enumeration].apply(intVal)
+                progClass.reflectField(fieldTerm).set(enumVal)
+              } catch {
+                case e: NoSuchElementException =>
+                  println(s"Can't parse $intVal for enum obj $obj")
+              }
             } else {
               throw new IllegalStateException(s"Don't know how to parse the resultType: ${resultType.toString}")
             }
