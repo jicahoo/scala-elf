@@ -8,6 +8,7 @@ import com.typesafe.scalalogging.Logger
 
 
 object App {
+  val logger = Logger(classOf[App])
 
   class Good {
     var a: String = _
@@ -48,22 +49,14 @@ object App {
     println(g.a)
   }
 
-  val logger = Logger(classOf[App])
   def main(args: Array[String]): Unit = {
     logger.info("Started")
     Hello.logDemo()
     var pwd = new File(".").getAbsolutePath
-    println(pwd)
+    logger.debug(pwd)
     val filePath = "src/main/resources/libxml2.so.2.9.1"
     val elfFile = new ElfFile(filePath)
     elfFile.printSummary()
-
-    val stdout = new StringBuilder
-    val stderr = new StringBuilder
-    val status = "ls wxx" ! ProcessLogger(stdout.append(_), stderr append _)
-    val x = "ls".lineStream_!.getClass
-    println(x)
-    println(s"status: $status,\n stdout: ${stdout.toString},\n stderr: ${stderr.toString}\n")
   }
 
 }

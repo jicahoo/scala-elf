@@ -3,6 +3,7 @@ import FileHeader.EndianessEnum.EndianessENum
 import SectionHeader.ShFlagsEnum.ShFlagsEnum
 import SectionHeader.{ShFlagsEnum, ShTypeEnum}
 import SectionHeader.ShTypeEnum.ShTypeEnum
+import com.typesafe.scalalogging.Logger
 
 import scala.reflect.runtime.{universe => ru}
 
@@ -22,6 +23,7 @@ case class SectionHeader(
 }
 
 object SectionHeader {
+  val logger = Logger(classOf[SectionHeader])
 
   object ShTypeEnum extends Enumeration {
     type ShTypeEnum = Value
@@ -59,7 +61,7 @@ object SectionHeader {
   def parse(byteArray: Array[Byte], phOffSet: Int, phEntSize: Int, phNum: Int, endian: EndianessENum): List[SectionHeader] = {
     (0 until phNum).map(phOffSet + _ * phEntSize).map(
       offSet => {
-        println(s"========offSet: $offSet")
+        logger.debug(s"========offSet: $offSet")
         val progHeaderMetaData = new SectionHeaderMetaData32
         val targetObjType  = ru.typeOf[SectionHeader]
         val targetObj = new SectionHeader()
@@ -68,8 +70,7 @@ object SectionHeader {
           metaDataType,
           targetObjType
         )
-        println("Nice")
-        println(targetObj)
+        logger.debug(targetObj.toString)
         targetObj
       }
     ).toList

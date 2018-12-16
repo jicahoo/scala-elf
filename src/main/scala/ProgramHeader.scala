@@ -4,6 +4,7 @@ import App.Good
 import FileHeader.EndianessEnum
 import FileHeader.EndianessEnum.EndianessENum
 import ProgramHeader.ProgHeaderTypeEnum.ProgHeaderTypeEnum
+import com.typesafe.scalalogging.Logger
 
 import scala.reflect.ClassTag
 import scala.reflect.runtime.{universe => ru}
@@ -22,6 +23,7 @@ case class ProgramHeader(
 
 
 object ProgramHeader {
+  val logger = Logger(classOf[ProgramHeader])
 
   object ProgHeaderTypeEnum extends Enumeration {
     type ProgHeaderTypeEnum = Value
@@ -44,7 +46,7 @@ object ProgramHeader {
   def parse(byteArray: Array[Byte], phOffSet: Int, phEntSize: Int, phNum: Int, endian: EndianessENum): List[ProgramHeader] = {
     (0 until phNum).map(phOffSet + _ * phEntSize).map(
       offSet => {
-        println(s"========offSet: $offSet")
+        logger.debug(s"========offSet: $offSet")
         val progHeaderMetaData = new ProgramHeaderMetaData32
         val targetObjType  = ru.typeOf[ProgramHeader]
         val targetObj = new ProgramHeader()
@@ -53,8 +55,7 @@ object ProgramHeader {
           metaDataType,
           targetObjType
         )
-        println("Nice")
-        println(targetObj)
+        logger.debug(targetObj.toString)
         targetObj
       }
     ).toList
@@ -84,7 +85,7 @@ object ProgramHeader {
       metaDataType,
       targetObjType
     )
-    println(CaseClassBeautifier.nice(targetObj))
+    logger.debug(CaseClassBeautifier.nice(targetObj))
   }
 
   object CaseClassBeautifier {
@@ -128,8 +129,8 @@ object ProgramHeader {
           val y = classTest.reflectMethod(x.asMethod)()
           val intVal = ParseUtils.asInt(byteArray, phOffSet, y.asInstanceOf[OffSetSizePair], endian)
           val fieldName = x.asMethod.name.toString
-          println(y.asInstanceOf[OffSetSizePair])
-          println(s"$fieldName intValue: 0x${intVal.toHexString}")
+          logger.debug(y.asInstanceOf[OffSetSizePair].toString)
+          logger.debug(s"$fieldName intValue: 0x${intVal.toHexString}")
           val fieldTermSymbol = targetObjType.decl(ru.TermName(fieldName))
           if (fieldTermSymbol.isTerm) {
             val fieldTerm = fieldTermSymbol.asTerm
@@ -147,7 +148,7 @@ object ProgramHeader {
                 progClass.reflectField(fieldTerm).set(enumVal)
               } catch {
                 case e: NoSuchElementException =>
-                  println(s"Can't parse $intVal for enum obj $obj")
+                  logger.debug(s"Can't parse $intVal for enum obj $obj. Exception is $e")
               }
             } else {
               throw new IllegalStateException(s"Don't know how to parse the resultType: ${resultType.toString}")
@@ -155,7 +156,7 @@ object ProgramHeader {
           }
         }
       )
-    //println(CaseClassBeautifier.nice(targetObj)) Not worked after change targetObj type from ProgramHeader to AnyRef
+    //logger.debug(CaseClassBeautifier.nice(targetObj)) Not worked after change targetObj type from ProgramHeader to AnyRef
     targetObj
   }
 

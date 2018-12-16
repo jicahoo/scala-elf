@@ -2,8 +2,10 @@ import java.nio.file.{Files, Paths}
 
 import FileHeader._
 import SectionHeader._
+import com.typesafe.scalalogging.Logger
 
 class ElfFile(val filePath: String) {
+  val logger = Logger(classOf[ElfFile])
   private var _endian = EndianessEnum.LITTLE
   private var _byteArray: Array[Byte] = _
 
@@ -32,7 +34,7 @@ class ElfFile(val filePath: String) {
     _byteArray = Files.readAllBytes(Paths.get(filePath))
 
 
-    println(s"Byte size: ${_byteArray.length}")
+    logger.debug(s"Byte size: ${_byteArray.length}")
     val magicNum = Array[Byte](0x7f.toByte, 'E'.toByte, 'L'.toByte, 'F'.toByte)
     if (!_byteArray.slice(0, 4).sameElements(magicNum)) {
       throw new IllegalArgumentException("Magic number is not '.ELF'.Maybe not a ELF file.")
@@ -75,7 +77,7 @@ class ElfFile(val filePath: String) {
       )
 
       _fileHeader = fileHeader
-      println(_fileHeader)
+      logger.debug(_fileHeader.toString)
 
       _phHeaders = ProgramHeader.parse(_byteArray,
         _fileHeader.phOffSet,
@@ -85,30 +87,30 @@ class ElfFile(val filePath: String) {
       )
 
       _shHeaders = SectionHeader.parse(_byteArray , sectHdrOff, shEntSize, shEntNum, endian)
-      _shHeaders.foreach( x => println(x.flags.map(_.toString).mkString("|")))
+      _shHeaders.foreach( x => logger.debug(x.flags.map(_.toString).mkString("|")))
 
 
       // Find the section .shstrtab
       val strTabSectHeaderIdx = sectHdrOff + (shEntNum - 1) * shEntSize
 
       val shType = ShTypeEnum.apply(ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x4, 4, endian))
-      println(shType)
+      logger.debug(shType.toString)
 
       val sectionOffSet = ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x10, 4, endian)
-      println(sectionOffSet)
+      logger.debug(sectionOffSet.toString)
       val sectionSize = ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x14, 4, endian)
-      println(sectionSize)
+      logger.debug(sectionSize.toString)
       (sectionOffSet until (sectionOffSet + sectionSize)).foreach(
         i => {
           val c = _byteArray(i)
           if (c == 0) {
-            println()
+            logger.debug("\n")
           } else {
-            print(_byteArray(i).toChar)
+            logger.debug(_byteArray(i).toChar.toString)
           }
         }
       )
-      println()
+      logger.debug("\n")
     }
   }
 }
