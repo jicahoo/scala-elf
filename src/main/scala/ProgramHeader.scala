@@ -4,6 +4,7 @@ import App.Good
 import FileHeader.EndianessEnum
 import FileHeader.EndianessEnum.EndianessENum
 import ProgramHeader.ProgHeaderTypeEnum.ProgHeaderTypeEnum
+import com.jichao.errors.InvalidEnumValue
 import com.typesafe.scalalogging.Logger
 
 import scala.reflect.ClassTag
@@ -144,11 +145,12 @@ object ProgramHeader {
               val module = classMirror.staticModule(enumPkgPath)
               val obj = classMirror.reflectModule(module)
               try {
-                val enumVal = obj.instance.asInstanceOf[Enumeration](intVal)
+                val enumVal = obj.instance.asInstanceOf[Enumeration].apply(intVal)
                 progClass.reflectField(fieldTerm).set(enumVal)
               } catch {
                 case e: NoSuchElementException =>
                   logger.debug(s"Can't parse $intVal for enum obj $obj. Exception is $e")
+                  throw InvalidEnumValue(s"Can't parse $intVal for enum obj $obj.")
               }
             } else {
               throw new IllegalStateException(s"Don't know how to parse the resultType: ${resultType.toString}")

@@ -13,14 +13,26 @@
 
     </appender>
 
+    <appender name="STDOUT_ONLY_MSG" class="ch.qos.logback.core.ConsoleAppender">
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>debug</level>
+        </filter>
+
+        <encoder>
+            <pattern>%m%n</pattern>
+        </encoder>
+
+    </appender>
+
     <logger name="com.jichao" level="debug"
             additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>
 
 
-    <root level="info">
-        <appender-ref ref="STDOUT" />
+    <root level="debug">
+        <appender-ref ref="STDOUT_ONLY_MSG" />
     </root>
 
 </configuration>

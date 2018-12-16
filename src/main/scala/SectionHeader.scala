@@ -31,6 +31,11 @@ object SectionHeader {
     val SHT_NOBITS, SHT_REL, SHT_SHLIB, SHT_DYNSYM, SHT_INIT_ARRAY, SHT_FINI_ARRAY = Value
     val SHT_PREINIT_ARRAY, SHT_GROUP, SHT_NUM = Value
     val SHT_LOOS:ShTypeEnum = Value(0x60000000)
+    val    SHT_GNU_ATTRIBUTES:ShTypeEnum = Value(0x6ffffff5) // Object attributes.
+    val    SHT_GNU_HASH:ShTypeEnum = Value(0x6ffffff6)       // GNU-style hash table.
+    val    SHT_GNU_verdef:ShTypeEnum = Value(0x6ffffffd)     // GNU version definitions.
+    val    SHT_GNU_verneed:ShTypeEnum = Value(0x6ffffffe)    // GNU version references.
+    val    SHT_GNU_versym:ShTypeEnum = Value(0x6fffffff)     // GNU symbol versions table.
   }
   object ShFlagsEnum extends Enumeration {
     type ShFlagsEnum = Value
