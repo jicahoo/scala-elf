@@ -3,6 +3,8 @@ import java.nio.file.{Files, Paths}
 import FileHeader._
 import SectionHeader._
 import com.typesafe.scalalogging.Logger
+
+import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.{universe => ru}
 
 
@@ -117,28 +119,73 @@ class ElfFile(val filePath: String) {
 
   }
 
+
   def printProgramHeaders(): Unit = {
     val getters = ru.typeOf[ProgramHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
+    val colNum = getters.size
+    var maxes = ListBuffer.fill(colNum)(0)
+    //TODO: The format algorithm is not efficient. But enough for now. May improve it in future.
     val geterNames = getters.map(_.name.toString.trim)
-    geterNames.foreach(x => print(s"$x\t\t\t"))
-    println()
+    geterNames.zipWithIndex.foreach(
+      x => {
+        if (x._1.length > maxes(x._2)) {
+          maxes.update(x._2, x._1.length)
+        }
+      }
+    )
+
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
 
     _phHeaders.foreach(
       x => {
-        getters.foreach( y => {
-          val obj = classMirror.reflect(x)
-          val result = obj.reflectMethod(y)()
-          result match {
-            case i: Int =>
-              print(s"0x${i.toHexString}\t\t\t")
-            case _ =>
-              print(s"$result\t\t\t")
+        getters.zipWithIndex.foreach(
+          y => {
+            val obj = classMirror.reflect(x)
+            val result = obj.reflectMethod(y._1)()
+            val newLen = result match {
+              case i: Int =>
+                s"0x${i.toHexString}".length
+              case _ =>
+                result.toString.length
+            }
+            if (newLen > maxes(y._2)) {
+              maxes.update(y._2, newLen)
+            }
           }
+        )
+      }
+    )
+    maxes = maxes.map(_+3)
+
+    geterNames.zipWithIndex.foreach(
+      x => {
+        val tailSpacesNum = maxes(x._2) - x._1.length
+        val tailSpaces = List.fill(tailSpacesNum)(" ").mkString
+        print(s"${x._1}$tailSpaces")
+      }
+    )
+    println()
+    println()
+
+    _phHeaders.foreach(
+      x => {
+        getters.zipWithIndex.foreach(
+          y => {
+            val obj = classMirror.reflect(x)
+            val result = obj.reflectMethod(y._1)()
+            val (resultStr, len) = result match {
+              case i: Int =>
+                (s"0x${i.toHexString}", s"0x${i.toHexString}".length)
+              case _ =>
+                (result.toString, result.toString.length)
+            }
+            val tailSpaces = List.fill(maxes(y._2) - len)(" ").mkString
+            print(s"$resultStr$tailSpaces")
           }
         )
         println()
       }
     )
+
   }
 }
