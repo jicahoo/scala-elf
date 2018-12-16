@@ -143,7 +143,7 @@ object ProgramHeader {
               val module = classMirror.staticModule(enumPkgPath)
               val obj = classMirror.reflectModule(module)
               try {
-                val enumVal = obj.instance.asInstanceOf[Enumeration].apply(intVal)
+                val enumVal = obj.instance.asInstanceOf[Enumeration](intVal)
                 progClass.reflectField(fieldTerm).set(enumVal)
               } catch {
                 case e: NoSuchElementException =>

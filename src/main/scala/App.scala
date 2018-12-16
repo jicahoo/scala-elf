@@ -1,7 +1,11 @@
 import java.io.{ByteArrayInputStream, File}
 
+import com.jichao.Hello
+
 import scala.reflect.runtime.{universe => ru}
 import sys.process._
+import com.typesafe.scalalogging.Logger
+
 
 object App {
 
@@ -44,7 +48,10 @@ object App {
     println(g.a)
   }
 
+  val logger = Logger(classOf[App])
   def main(args: Array[String]): Unit = {
+    logger.info("Started")
+    Hello.logDemo()
     var pwd = new File(".").getAbsolutePath
     println(pwd)
     val filePath = "src/main/resources/libxml2.so.2.9.1"
