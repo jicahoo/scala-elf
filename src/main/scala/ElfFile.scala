@@ -3,6 +3,8 @@ import java.nio.file.{Files, Paths}
 import FileHeader._
 import SectionHeader._
 import com.typesafe.scalalogging.Logger
+import scala.reflect.runtime.{universe => ru}
+
 
 class ElfFile(val filePath: String) {
   val logger = Logger(classOf[ElfFile])
@@ -112,5 +114,31 @@ class ElfFile(val filePath: String) {
       )
       logger.debug("\n")
     }
+
+  }
+
+  def printProgramHeaders(): Unit = {
+    val getters = ru.typeOf[ProgramHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
+    val geterNames = getters.map(_.name.toString.trim)
+    geterNames.foreach(x => print(s"$x\t\t\t"))
+    println()
+    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
+
+    _phHeaders.foreach(
+      x => {
+        getters.foreach( y => {
+          val obj = classMirror.reflect(x)
+          val result = obj.reflectMethod(y)()
+          result match {
+            case i: Int =>
+              print(s"0x${i.toHexString}\t\t\t")
+            case _ =>
+              print(s"$result\t\t\t")
+          }
+          }
+        )
+        println()
+      }
+    )
   }
 }

@@ -1,6 +1,5 @@
 import java.nio.file.{Files, Paths}
 
-import App.Good
 import FileHeader.EndianessEnum
 import FileHeader.EndianessEnum.EndianessENum
 import ProgramHeader.ProgHeaderTypeEnum.ProgHeaderTypeEnum
@@ -29,18 +28,18 @@ object ProgramHeader {
   object ProgHeaderTypeEnum extends Enumeration {
     type ProgHeaderTypeEnum = Value
     val PT_NULL, PT_LOAD, PT_DYNAMIC, PT_INTERP, PT_NOTE, PT_SHLIB, PT_PHDR = Value
-    val PT_LOOS: ProgHeaderTypeEnum = Value(0x60000000)
+    val PT_LOOS:ProgHeaderTypeEnum = Value(0x60000000)
     //https://github.com/comex/cs/blob/master/elfconst.py
     val PT_GNU_EH_FRAME: ProgHeaderTypeEnum = Value(0x6474e550)
     val PT_GNU_STACK: ProgHeaderTypeEnum = Value(0x6474e551)
     val PT_GNU_RELRO: ProgHeaderTypeEnum = Value(0x6474e552)
     val PT_LOSUNW: ProgHeaderTypeEnum = Value(0x6ffffffa)
-    //    val PT_SUNWBSS = Value(0x6ffffffa)
+//    val PT_SUNWBSS = Value(0x6ffffffa)
     val PT_SUNWSTACK: ProgHeaderTypeEnum = Value(0x6ffffffb)
-    val PT_HISUNW: ProgHeaderTypeEnum = Value(0x6fffffff)
+    val PT_HISUNW:ProgHeaderTypeEnum = Value(0x6fffffff)
     //HIOS = 0x6fffffff,
     val PT_LOPROC: ProgHeaderTypeEnum = Value(0x70000000)
-    val PT_HIPROC: ProgHeaderTypeEnum = Value(0x7fffffff)
+    val PT_HIPROC:ProgHeaderTypeEnum = Value(0x7fffffff)
 
   }
 
@@ -49,7 +48,7 @@ object ProgramHeader {
       offSet => {
         logger.debug(s"========offSet: $offSet")
         val progHeaderMetaData = new ProgramHeaderMetaData32
-        val targetObjType = ru.typeOf[ProgramHeader]
+        val targetObjType  = ru.typeOf[ProgramHeader]
         val targetObj = new ProgramHeader()
         val metaDataType = ru.typeOf[ProgramHeaderMetaData]
         progHeader(offSet, progHeaderMetaData, targetObj, byteArray, EndianessEnum.LITTLE,
@@ -63,21 +62,13 @@ object ProgramHeader {
   }
 
 
-  def setVal[T](a: Any, fieldName: String, strVal: T): Unit = {
-    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
-    val classTest = classMirror.reflect(a)
-    val fieldX = ru.typeOf[Good].decl(ru.TermName(fieldName)).asTerm
-    classTest.reflectField(fieldX).set(strVal)
-  }
-
-
   def main(args: Array[String]): Unit = {
     val progHeaderMetaData = new ProgramHeaderMetaData32
     val filePath = "src/main/resources/libxml2.so.2.9.1"
     val byteArray = Files.readAllBytes(Paths.get(filePath))
     val elfFile = new ElfFile(filePath)
     elfFile.printSummary()
-    val targetObjType = ru.typeOf[ProgramHeader]
+    val targetObjType  = ru.typeOf[ProgramHeader]
     val targetObj = new ProgramHeader()
     val metaDataType = ru.typeOf[ProgramHeaderMetaData]
     progHeader(elfFile.fileHeader.phOffSet, progHeaderMetaData, targetObj, byteArray, EndianessEnum.LITTLE,
