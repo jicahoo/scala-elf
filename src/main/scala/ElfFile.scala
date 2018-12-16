@@ -119,73 +119,60 @@ class ElfFile(val filePath: String) {
 
   }
 
-
-  def printProgramHeaders(): Unit = {
-    val getters = ru.typeOf[ProgramHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
-    val colNum = getters.size
-    var maxes = ListBuffer.fill(colNum)(0)
+  def printTable(tab :List[List[String]]): Unit = {
     //TODO: The format algorithm is not efficient. But enough for now. May improve it in future.
-    val geterNames = getters.map(_.name.toString.trim)
-    geterNames.zipWithIndex.foreach(
-      x => {
-        if (x._1.length > maxes(x._2)) {
-          maxes.update(x._2, x._1.length)
-        }
-      }
-    )
 
-    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
+    val colNum = tab.head.size
+    var maxes = ListBuffer.fill(colNum)(0)
 
-    _phHeaders.foreach(
-      x => {
-        getters.zipWithIndex.foreach(
-          y => {
-            val obj = classMirror.reflect(x)
-            val result = obj.reflectMethod(y._1)()
-            val newLen = result match {
-              case i: Int =>
-                s"0x${i.toHexString}".length
-              case _ =>
-                result.toString.length
-            }
-            if (newLen > maxes(y._2)) {
-              maxes.update(y._2, newLen)
+    tab.foreach(
+      row => {
+        row.zipWithIndex.foreach(
+          cell => {
+            if (cell._1.length > maxes(cell._2)) {
+              maxes.update(cell._2, cell._1.length)
             }
           }
         )
       }
     )
     maxes = maxes.map(_+3)
-
-    geterNames.zipWithIndex.foreach(
-      x => {
-        val tailSpacesNum = maxes(x._2) - x._1.length
-        val tailSpaces = List.fill(tailSpacesNum)(" ").mkString
-        print(s"${x._1}$tailSpaces")
-      }
-    )
-    println()
-    println()
-
-    _phHeaders.foreach(
-      x => {
-        getters.zipWithIndex.foreach(
-          y => {
-            val obj = classMirror.reflect(x)
-            val result = obj.reflectMethod(y._1)()
-            val (resultStr, len) = result match {
-              case i: Int =>
-                (s"0x${i.toHexString}", s"0x${i.toHexString}".length)
-              case _ =>
-                (result.toString, result.toString.length)
-            }
-            val tailSpaces = List.fill(maxes(y._2) - len)(" ").mkString
-            print(s"$resultStr$tailSpaces")
-          }
-        )
+    tab.foreach(
+      row => {
+        row.zipWithIndex.foreach(
+          cell => {
+            val tailSpaces = List.fill(maxes(cell._2) - cell._1.length)(" ").mkString
+            print(s"${cell._1}$tailSpaces")
+          })
         println()
       }
     )
+
+  }
+
+  def printProgramHeaders(): Unit = {
+    val getters = ru.typeOf[ProgramHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
+    val getterNames = getters.map(_.name.toString.trim)
+    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
+
+    val rows = _phHeaders.map(
+      phHeader => {
+        getters.map(
+          getter => {
+            val obj = classMirror.reflect(phHeader)
+            val result = obj.reflectMethod(getter)()
+            result match {
+              case i: Int =>
+                s"0x${i.toHexString}"
+              case _ =>
+                result.toString
+            }
+          }
+        ).toList
+      }
+    )
+    val allRows = getterNames.toList :: rows
+    printTable(allRows)
 
   }
 }
