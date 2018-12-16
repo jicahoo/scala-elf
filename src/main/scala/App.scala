@@ -1,10 +1,9 @@
-import java.io.{ByteArrayInputStream, File}
+import java.io.File
 
 import com.jichao.Hello
+import com.typesafe.scalalogging.Logger
 
 import scala.reflect.runtime.{universe => ru}
-import sys.process._
-import com.typesafe.scalalogging.Logger
 
 
 object App {
