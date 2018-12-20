@@ -2,6 +2,7 @@ import java.nio.file.{Files, Paths}
 
 import FileHeader._
 import SectionHeader._
+import com.sun.tools.javac.code.TypeTag
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ListBuffer
@@ -150,16 +151,20 @@ class ElfFile(val filePath: String) {
 
   }
 
+
+  def phHeaders: List[ProgramHeader] = _phHeaders
+  def shHeaders: List[SectionHeader] = _shHeaders
+
   def printProgramHeaders(): Unit = {
     val getters = ru.typeOf[ProgramHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
     val getterNames = getters.map(_.name.toString.trim)
     val classMirror = ru.runtimeMirror(getClass.getClassLoader)
 
-    val rows = _phHeaders.map(
+    val rows = _phHeaders.zipWithIndex.map(
       phHeader => {
-        getters.map(
+        phHeader._2.toString::getters.map(
           getter => {
-            val obj = classMirror.reflect(phHeader)
+            val obj = classMirror.reflect(phHeader._1)
             val result = obj.reflectMethod(getter)()
             result match {
               case i: Int =>
@@ -171,8 +176,33 @@ class ElfFile(val filePath: String) {
         ).toList
       }
     )
-    val allRows = getterNames.toList :: rows
+    val allRows = ("Idx"::getterNames.toList):: rows
     printTable(allRows)
+  }
 
+  //TODO: Dup of printProgramHeaders. Dedup
+  def printSectionHeaders(): Unit = {
+    val getters = ru.typeOf[SectionHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
+    val getterNames = getters.map(_.name.toString.trim)
+    val classMirror = ru.runtimeMirror(getClass.getClassLoader)
+
+    val rows = _shHeaders.zipWithIndex.map(
+      phHeader => {
+        phHeader._2.toString::getters.map(
+          getter => {
+            val obj = classMirror.reflect(phHeader._1)
+            val result = obj.reflectMethod(getter)()
+            result match {
+              case i: Int =>
+                s"0x${i.toHexString}"
+              case _ =>
+                result.toString
+            }
+          }
+        ).toList
+      }
+    )
+    val allRows = ("Idx"::getterNames.toList) :: rows
+    printTable(allRows)
   }
 }

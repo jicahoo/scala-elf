@@ -12,12 +12,13 @@ object App {
   def main(args: Array[String]): Unit = {
     logger.info("Started")
     Hello.logDemo()
-    var pwd = new File(".").getAbsolutePath
+    val pwd = new File(".").getAbsolutePath
     logger.debug(pwd)
     val filePath = "src/main/resources/libxml2.so.2.9.1"
     val elfFile = new ElfFile(filePath)
     elfFile.printSummary()
     elfFile.printProgramHeaders()
+    elfFile.printSectionHeaders()
   }
 
 }
