@@ -204,7 +204,11 @@ class ElfFile(val filePath: String) {
             val result = obj.reflectMethod(getter)()
             result match {
               case i: Int =>
-                s"0x${i.toHexString}"
+                  if (getter.name.toString != "shFlags" ) {
+                    s"0x${i.toHexString}"
+                  } else {
+                    phHeader._1.flags.mkString(",")
+                  }
               case _ =>
                 result.toString
             }
