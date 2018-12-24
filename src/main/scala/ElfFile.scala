@@ -105,6 +105,7 @@ class ElfFile(val filePath: String) {
       logger.debug(sectionOffSet.toString)
       val sectionSize = ParseUtils.asInt(_byteArray, strTabSectHeaderIdx + 0x14, 4, endian)
       logger.debug(sectionSize.toString)
+
       (sectionOffSet until (sectionOffSet + sectionSize)).foreach(
         i => {
           val c = _byteArray(i)
@@ -180,6 +181,13 @@ class ElfFile(val filePath: String) {
     printTable(allRows)
   }
 
+  def idxToName(byteArray: Array[Byte], strTabSectHdr: SectionHeader, idx: Int): String = {
+    val offSet = strTabSectHdr.shOffset
+    val sb = new StringBuilder
+    val start = offSet + idx
+    Stream.from(start).takeWhile(byteArray(_) != 0).foreach(x => sb append byteArray(x).toChar)
+    sb.toString()
+  }
   //TODO: Dup of printProgramHeaders. Dedup
   def printSectionHeaders(): Unit = {
     val getters = ru.typeOf[SectionHeader].decls.filter(_.isMethod).map(_.asMethod).filter(_.isGetter)
@@ -188,7 +196,9 @@ class ElfFile(val filePath: String) {
 
     val rows = _shHeaders.zipWithIndex.map(
       phHeader => {
-        phHeader._2.toString::getters.map(
+        phHeader._2.toString::
+        idxToName(_byteArray, _shHeaders.last, phHeader._1.shName)::
+          getters.map(
           getter => {
             val obj = classMirror.reflect(phHeader._1)
             val result = obj.reflectMethod(getter)()
@@ -202,7 +212,7 @@ class ElfFile(val filePath: String) {
         ).toList
       }
     )
-    val allRows = ("Idx"::getterNames.toList) :: rows
+    val allRows = ("Idx"::"Name"::getterNames.toList) :: rows
     printTable(allRows)
   }
 }
